@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KHANTASY - Settings with Comments</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;overflow-x:hidden;font-family:'Poppins',sans-serif;color:#fff;}
+body{
+    background:linear-gradient(-45deg,#ff0057,#ff7b00,#00c3ff,#7b00ff);
+    background-size:400% 400%;
+    animation:gradientMove 10s ease infinite;
+}
+@keyframes gradientMove{
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+header{
+    display:flex;align-items:center;justify-content:space-between;padding:18px 20px;
+    background:rgba(0,0,0,0.28);backdrop-filter:blur(6px);
+}
+.menu-btn{font-size:26px;cursor:pointer}
+h1.logo{font-size:36px;color:#ff6a00;font-weight:900;letter-spacing:3px}
+.sidebar{
+    position:fixed;top:0;left:-250px;width:250px;height:100%;
+    background:rgba(0,0,0,0.95);padding-top:60px;transition:.35s;z-index:1000;overflow-y:auto;
+}
+.sidebar.active{left:0}
+.sidebar a{display:block;padding:14px 20px;color:#fff;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.06)}
+.sidebar a:hover{background:#0ff;color:#000}
+main{padding:90px 24px 60px;max-width:1100px;margin:0 auto}
+main h2{font-size:28px;margin-bottom:8px}
+.card{background:rgba(0,0,0,0.35);padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);margin-bottom:16px;}
+label{display:block;font-weight:600;margin-bottom:6px}
+input[type="text"], input[type="password"], textarea{
+    width:100%;padding:8px;border-radius:6px;border:none;outline:none;background:rgba(255,255,255,0.04);color:#fff;
+}
+textarea{min-height:60px;resize:vertical;padding:10px}
+button{background:#ff6a00;color:#fff;padding:10px 14px;border:none;border-radius:8px;cursor:pointer;font-weight:700;margin-top:8px;}
+button:hover{opacity:0.9}
+.comment-box{margin-top:10px;}
+.comment{background:rgba(0,0,0,0.4);padding:10px 12px;border-radius:8px;margin-top:8px;}
+.comment strong{color:#0ff;}
+.error{color:#e74c3c;font-size:13px;margin-top:4px;}
+.success{color:#0f0;font-size:13px;margin-top:4px;}
+.account-info{margin-top:10px;font-size:16px;}
+.logout-btn{background:#e74c3c;color:#fff;margin-top:6px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="menu-btn" id="menuBtn">☰</div>
+  <h1 class="logo">KHANTASY</h1>
+</header>
+
+<div class="sidebar" id="sidebar">
+  <a href="index.html" id="homeLink">Home</a>
+  <a href="projects.html">Projects</a>
+  <a href="shop.html">Shop</a>
+  <a href="social.html">Social</a>
+  <a href="services.html">Services</a>
+  <a href="blog.html">Blog</a>
+  <a href="team.html">Team</a>
+  <a href="contact.html">Contact</a>
+  <a href="faq.html">FAQ</a>
+  <a href="setting.html">Setting</a>
+  <a href="about.html">About</a>
+</div>
+
+<main>
+<h2>Settings & Public Comments</h2>
+
+<!-- Account section -->
+<div class="card" id="accountSection">
+  <div id="registerLogin">
+    <h3>Create Account</h3>
+    <label>Username</label>
+    <input id="regUsername" type="text" placeholder="Enter username">
+    <label>Password</label>
+    <input id="regPassword" type="password" placeholder="Enter password">
+    <label>Confirm Password</label>
+    <input id="regConfirm" type="password" placeholder="Confirm password">
+    <button id="registerBtn">Create Account</button>
+    <div id="regMsg" class="error"></div>
+
+    <hr style="margin:10px 0;border-color:rgba(255,255,255,0.2);">
+
+    <h3>Login</h3>
+    <label>Username</label>
+    <input id="loginUsername" type="text" placeholder="Enter username">
+    <label>Password</label>
+    <input id="loginPassword" type="password" placeholder="Enter password">
+    <button id="loginBtn">Login</button>
+    <div id="loginMsg" class="error"></div>
+  </div>
+
+  <div id="loggedInInfo" style="display:none;">
+    <div class="account-info">Logged in as: <span id="currentUserName"></span></div>
+    <button class="logout-btn" id="logoutBtn">Logout</button>
+  </div>
+</div>
+
+<!-- Comment section -->
+<div class="card">
+  <h3>Leave a Comment</h3>
+  <textarea id="commentInput" placeholder="Write your comment..." disabled></textarea>
+  <button id="postComment" disabled>Post Comment</button>
+  <div class="comment-box" id="commentBox"></div>
+</div>
+
+</main>
+
+<script>
+const sidebar = document.getElementById('sidebar');
+const menuBtn = document.getElementById('menuBtn');
+menuBtn.addEventListener('click', ()=> sidebar.classList.toggle('active'));
+document.getElementById('homeLink').addEventListener('click', (e)=>{ e.preventDefault(); sidebar.classList.remove('active'); window.location.href='index.html'; });
+
+// localStorage users and comments
+let users = JSON.parse(localStorage.getItem('khantasy_users') || '{}');
+let comments = JSON.parse(localStorage.getItem('khantasy_comments') || '[]');
+let currentUser = localStorage.getItem('khantasy_currentUser') || null;
+
+// DOM refs
+const regU = document.getElementById('regUsername');
+const regP = document.getElementById('regPassword');
+const regC = document.getElementById('regConfirm');
+const regBtn = document.getElementById('registerBtn');
+const regMsg = document.getElementById('regMsg');
+
+const loginU = document.getElementById('loginUsername');
+const loginP = document.getElementById('loginPassword');
+const loginBtn = document.getElementById('loginBtn');
+const loginMsg = document.getElementById('loginMsg');
+
+const commentInput = document.getElementById('commentInput');
+const postComment = document.getElementById('postComment');
+const commentBox = document.getElementById('commentBox');
+
+const registerLoginDiv = document.getElementById('registerLogin');
+const loggedInInfo = document.getElementById('loggedInInfo');
+const currentUserName = document.getElementById('currentUserName');
+const logoutBtn = document.getElementById('logoutBtn');
+
+// helpers
+function renderComments(){
+  commentBox.innerHTML = '';
+  comments.forEach(c=>{
+    const div = document.createElement('div');
+    div.className = 'comment';
+    div.innerHTML = `<strong>${c.user}:</strong> ${c.text}`;
+    commentBox.appendChild(div);
+  });
+}
+function updateUI(){
+  if(currentUser){
+    registerLoginDiv.style.display='none';
+    loggedInInfo.style.display='block';
+    currentUserName.textContent=currentUser;
+    commentInput.disabled=false;
+    postComment.disabled=false;
+  }else{
+    registerLoginDiv.style.display='block';
+    loggedInInfo.style.display='none';
+    commentInput.disabled=true;
+    postComment.disabled=true;
+  }
+}
+
+// register
+regBtn.addEventListener('click', ()=>{
+  const username = regU.value.trim();
+  const pass = regP.value;
+  const confirm = regC.value;
+  if(!username || !pass || !confirm){ regMsg.textContent='All fields required'; return;}
+  if(pass !== confirm){ regMsg.textContent='Passwords do not match'; return;}
+  if(users[username]){ regMsg.textContent='Username already exists'; return;}
+  users[username] = pass;
+  localStorage.setItem('khantasy_users', JSON.stringify(users));
+  regMsg.textContent='Account created! Please login.';
+  regMsg.className='success';
+  regU.value=''; regP.value=''; regC.value='';
+});
+
+// login
+loginBtn.addEventListener('click', ()=>{
+  const username = loginU.value.trim();
+  const pass = loginP.value;
+  if(!username || !pass){ loginMsg.textContent='Enter username & password'; return;}
+  if(!users[username] || users[username]!==pass){ loginMsg.textContent='Invalid username or password'; return;}
+  currentUser = username;
+  localStorage.setItem('khantasy_currentUser', currentUser);
+  loginMsg.textContent='';
+  updateUI();
+  renderComments();
+});
+
+// logout
+logoutBtn.addEventListener('click', ()=>{
+  currentUser=null;
+  localStorage.removeItem('khantasy_currentUser');
+  updateUI();
+});
+
+// post comment
+postComment.addEventListener('click', ()=>{
+  const text = commentInput.value.trim();
+  if(!text) return;
+  comments.push({user: currentUser, text});
+  localStorage.setItem('khantasy_comments', JSON.stringify(comments));
+  commentInput.value='';
+  renderComments();
+});
+
+// init
+updateUI();
+renderComments();
+</script>
+
+</body>
+</html>
